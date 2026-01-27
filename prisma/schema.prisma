@@ -1,3 +1,4 @@
+
 generator client {
   provider        = "prisma-client"
   output          = "../generated/prisma"
@@ -54,6 +55,8 @@ model User {
   image         String?
   sessions      Session[]
   accounts      Account[]
+
+  phone String?
 
   @@map("users")
 }
