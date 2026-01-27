@@ -45,6 +45,7 @@ export const auth = betterAuth({
     },
     emailVerification: {
         sendOnSignUp:true,
+        autoSignInAfterVerification:true,
         sendVerificationEmail: async ({ user, url, token }, request) => {
             try {
                 const verificationUrl = `${process.env.APP_URL}/verify-email?token=${token}`;
@@ -68,7 +69,7 @@ export const auth = betterAuth({
         </p>
         <p style="font-size: 14px; color: #999;">
             If the button doesn't work, copy and paste this link into your browser:<br/>
-            <a href="${verificationUrl}" style="color: #555;">${verificationUrl}</a>
+            <a href="${url}" style="color: #555;">${verificationUrl}</a>
         </p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
         <p style="font-size: 12px; color: #aaa;">
@@ -86,5 +87,13 @@ export const auth = betterAuth({
             }
 
         },
+    },
+    socialProviders: {
+        google: { 
+            prompt:"select_account consent",
+            accessType:"offline",
+            clientId: process.env.GOOGLE_CLIENT_ID as string, 
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
+        }, 
     },
 });
