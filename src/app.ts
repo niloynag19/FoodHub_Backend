@@ -3,8 +3,14 @@ import { prisma } from "./lib/prisma";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
 import { postRouter } from "./modules/post/post.router";
+import cors from 'cors'
 
 const app=express();
+
+app.use(cors({
+    origin:process.env.APP_URL || "http://localhost:3000",
+    credentials:true
+}))
 app.use(express.json());
 
 app.use("/posts",postRouter)
