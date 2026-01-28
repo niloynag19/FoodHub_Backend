@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npx tsx watch src/server.ts",
-    "admin": "npx tsx watch src/scripts/Admin.ts"
+    "admin": "npx tsx watch src/scripts/Admin.ts",
+    "provider": "npx tsx watch src/scripts/provider.ts"
   },
   "keywords": [],
   "author": "",

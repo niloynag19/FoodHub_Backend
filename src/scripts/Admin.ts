@@ -1,39 +1,30 @@
 import { prisma } from "../lib/prisma";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 import { UserRole } from "../middlewares/auth";
 
-async function createAdmin() {
+async function seedAdmin() {
     try {
         const adminEmail = "admin@gmail.com";
+        const hashedAdminPassword = await bcrypt.hash("admin1234", 12);
 
-        const existingAdmin = await prisma.user.findUnique({
-            where: { email: adminEmail }
-        });
-
-        if (existingAdmin) {
-            console.log("Admin already exists!");
-            console.log(existingAdmin);
-            return;
-        }
-        const hashedPassword = await bcrypt.hash("admin1234", 12);
-
-        const newAdmin = await prisma.user.create({
-            data: {
+        const admin = await prisma.user.upsert({
+            where: { email: adminEmail },
+            update: {},
+            create: {
                 name: "System Admin",
                 email: adminEmail,
-                password: hashedPassword,
+                password: hashedAdminPassword,
                 role: UserRole.ADMIN,
                 emailVerified: true,
                 status: "ACTIVE"
             }
         });
-
-        console.log(" Admin created successfully with Prisma!");
-        console.log(newAdmin);
-
+        console.log(" Admin successfully processed:", admin.email);
     } catch (error) {
-        console.error(" Error seeding admin:", error);
+        console.error(" Admin Seeding failed:", error);
+    } finally {
+        await prisma.$disconnect();
     }
 }
 
-createAdmin();
+seedAdmin();
