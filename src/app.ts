@@ -4,6 +4,8 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
 import { postRouter } from "./modules/post/post.router";
 import cors from 'cors'
+import { userRoutes } from "./modules/user/user.router";
+
 
 const app=express();
 
@@ -12,8 +14,11 @@ app.use(cors({
     credentials:true
 }))
 app.use(express.json());
+app.use("/api/users", userRoutes);
 
 app.use("/posts",postRouter)
+
+
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
