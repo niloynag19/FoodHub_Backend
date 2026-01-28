@@ -1,17 +1,12 @@
 import express, { NextFunction, Request, Response } from 'express'
+import auth, { UserRole } from '../../middlewares/auth';
 
 
-const router=express.Router();
+const router = express.Router();
 
-const auth=()=>{
-    return async (req:Request,res:Response,next:NextFunction)=>{
-        console.log("Middle ware");
-        next();
-    }
-}
 
-router.post('/',auth(),(req:Request,res:Response)=>{
+router.post('/', auth(UserRole.CUSTOMER), (req: Request, res: Response) => {
     res.send("Create a new post")
 })
 
-export const postRouter=router
+export const postRouter = router
