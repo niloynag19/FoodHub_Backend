@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
-        provider: "postgresql", // or "mysql", "postgresql", ...etc
+        provider: "postgresql", 
     }),
     trustedOrigins: [process.env.APP_URL!],
     user: {
@@ -41,7 +41,7 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
         autoSignIn: false,
-        requireEmailVerification: true,
+        requireEmailVerification: false,
     },
     emailVerification: {
         sendOnSignUp:true,

@@ -5,6 +5,7 @@ import { postRouter } from "./modules/post/post.router";
 import cors from 'cors'
 import { userRoutes } from "./modules/user/user.router";
 import { CategoryRoutes } from "./modules/category/category.routes";
+import { MealRoutes } from "./modules/meals/mealRoutes";
 
 
 const app=express();
@@ -17,6 +18,8 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 
 app.use("/api/categories", CategoryRoutes);
+
+app.use("/api/meals", MealRoutes);
 
 app.use("/posts",postRouter)
 

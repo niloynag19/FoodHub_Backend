@@ -1,38 +1,40 @@
+import { auth } from "../lib/auth";
 import { prisma } from "../lib/prisma";
-import bcrypt from "bcrypt";
-import { UserRole } from "../middlewares/auth";
 
 async function seedAdmin() {
     try {
-        const adminEmail = "admin1@gmail.com";
-        const existingUser = await prisma.user.findUnique({
-            where:{
-                email:adminEmail
-            }
-        })
-        if(existingUser)
-        {
-            console.log("User already exits");
-        }
-        const hashedAdminPassword = await bcrypt.hash("admin1234", 12);
+        console.log("🚀 Seeding Started...");
+        const adminEmail = "admin2@admin.com";
+        const adminPassword = "admin1234";
 
-        const admin = await prisma.user.upsert({
-            where: { email: adminEmail },
-            update: {},
-            create: {
-                name: "System Admin",
+        await prisma.account.deleteMany({ where: { user: { email: adminEmail } } });
+        await prisma.user.deleteMany({ where: { email: adminEmail } });
+
+        const user = await auth.api.signUpEmail({
+            body: {
                 email: adminEmail,
-                password: hashedAdminPassword,
-                role: UserRole.ADMIN,
-                emailVerified: true,
-                status: "ACTIVE"
-            }
+                password: adminPassword,
+                name: "Admin Saheb",
+            },
         });
-        console.log(" Admin successfully processed:", admin.email);
+
+        if (user) {
+            await prisma.user.update({
+                where: { email: adminEmail },
+                data: {
+                    role: "ADMIN",
+                    emailVerified: true,
+                    status: "ACTIVE",
+                }
+            });
+            console.log(" Admin created with Account credentials!");
+        }
+
+        console.log("******* SUCCESS ******");
     } catch (error) {
-        console.error(" Admin Seeding failed:", error);
+        console.error(" Error:", error);
     } finally {
-        await prisma.$disconnect();
+        process.exit();
     }
 }
 
