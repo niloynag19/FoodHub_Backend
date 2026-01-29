@@ -1,10 +1,10 @@
 import express from "express";
-import { prisma } from "./lib/prisma";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
 import { postRouter } from "./modules/post/post.router";
 import cors from 'cors'
 import { userRoutes } from "./modules/user/user.router";
+import { CategoryRoutes } from "./modules/category/category.routes";
 
 
 const app=express();
@@ -16,8 +16,9 @@ app.use(cors({
 app.use(express.json());
 app.use("/api/users", userRoutes);
 
-app.use("/posts",postRouter)
+app.use("/api/categories", CategoryRoutes);
 
+app.use("/posts",postRouter)
 
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
