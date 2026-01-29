@@ -5,6 +5,15 @@ import { UserRole } from "../middlewares/auth";
 async function seedProvider() {
     try {
         const providerEmail = "provider@gmail.com";
+        const existingUser = await prisma.user.findUnique({
+            where:{
+                email:providerEmail
+            }
+        })
+        if(existingUser)
+        {
+            console.log("User already exits");
+        }
         const hashedProviderPassword = await bcrypt.hash("provider1234", 12);
 
         const provider = await prisma.user.upsert({

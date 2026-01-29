@@ -4,7 +4,16 @@ import { UserRole } from "../middlewares/auth";
 
 async function seedAdmin() {
     try {
-        const adminEmail = "admin@gmail.com";
+        const adminEmail = "admin1@gmail.com";
+        const existingUser = await prisma.user.findUnique({
+            where:{
+                email:adminEmail
+            }
+        })
+        if(existingUser)
+        {
+            console.log("User already exits");
+        }
         const hashedAdminPassword = await bcrypt.hash("admin1234", 12);
 
         const admin = await prisma.user.upsert({
