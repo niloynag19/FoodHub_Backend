@@ -1,11 +1,11 @@
 import express from "express";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
-import { postRouter } from "./modules/post/post.router";
 import cors from 'cors'
 import { userRoutes } from "./modules/user/user.router";
 import { CategoryRoutes } from "./modules/category/category.routes";
 import { MealRoutes } from "./modules/meals/mealRoutes";
+import { OrderRoutes } from "./modules/order/orderRoutes";
 
 
 const app=express();
@@ -21,7 +21,7 @@ app.use("/api/categories", CategoryRoutes);
 
 app.use("/api/meals", MealRoutes);
 
-app.use("/posts",postRouter)
+app.use("/api/v1/orders", OrderRoutes);
 
 
 app.all("/api/auth/*splat", toNodeHandler(auth));

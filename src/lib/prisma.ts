@@ -1,10 +1,15 @@
 import "dotenv/config";
-import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '../../generated/prisma/client'
+import pg from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
+// রুটে থাকা জেনারেটেড ফোল্ডারে যাওয়ার জন্য দুই ধাপ পেছনে (../../) যেতে হবে
+import { PrismaClient, Prisma } from '../../generated/prisma/client'; 
 
-const connectionString = `${process.env.DATABASE_URL}`
+const connectionString = `${process.env.DATABASE_URL}`;
+const pool = new pg.Pool({ connectionString });
+const adapter = new PrismaPg(pool);
 
-const adapter = new PrismaPg({ connectionString })
-const prisma = new PrismaClient({ adapter })
+export const prisma = new PrismaClient({ adapter });
 
-export { prisma }
+// এখান থেকে সব টাইপ এক্সপোর্ট হবে (OrderStatus, UserRole ইত্যাদি)
+export * from '../../generated/prisma/client'; 
+export { Prisma };
