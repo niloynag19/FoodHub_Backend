@@ -51,7 +51,7 @@ model User {
   orders          Order[]          @relation("CustomerOrders")
   reviews         Review[]
 
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean   @default(true)
   image         String?
   sessions      Session[]
   accounts      Account[]

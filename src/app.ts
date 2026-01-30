@@ -10,6 +10,7 @@ import { UserRoutes } from "./modules/user/user.router";
 import { ProviderRoutes } from "./modules/provider/providerRoutes";
 import { ReviewRoutes } from "./modules/review/reviewRoutes";
 import { StatsRoutes } from "./modules/stats/state.routes";
+import { AdminRoutes } from "./modules/admin/adminRoutes";
  
 
 const app = express();
@@ -26,6 +27,8 @@ app.use(express.json());
 app.use("/api/users", UserRoutes);
 
 app.use("/api/providers", ProviderRoutes);
+
+app.use("/api/admin", AdminRoutes);
 
 app.use("/api/categories", CategoryRoutes);
 
