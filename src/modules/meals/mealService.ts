@@ -11,19 +11,33 @@ const getProviderIdByUserId = async (userId: string) => {
 };
 
 const createMealIntoDB = async (payload: any, userId: string) => {
+    const { name, categoryId } = payload;
     const providerId = await getProviderIdByUserId(userId);
 
-    return await prisma.meal.create({
-        data: {
-            ...payload,
-            providerId, 
+    const categoryExists = await prisma.category.findUnique({
+        where: { id: categoryId },
+    });
+    if (!categoryExists) throw new Error("Invalid Category ID");
+
+    const alreadyExists = await prisma.meal.findFirst({
+        where: {
+            name: { equals: name, mode: 'insensitive' }, 
+            providerId,
         },
+    });
+
+    if (alreadyExists) {
+        throw new Error("You have already added a meal with this name!");
+    }
+
+    return await prisma.meal.create({
+        data: { ...payload, providerId },
+        include: { category: true }
     });
 };
 
 const getAllMealsFromDB = async (query: any) => {
     const { searchTerm, categoryId, minPrice, maxPrice, page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' } = query;
-    
     const skip = (Number(page) - 1) * Number(limit);
 
     const whereCondition: any = {
@@ -56,7 +70,11 @@ const getAllMealsFromDB = async (query: any) => {
                     restaurantName: true, 
                     user: { select: { name: true, email: true } } 
                 } 
-            } 
+            },
+          
+            reviews: {
+                select: { rating: true }
+            }
         },
         orderBy: { [sortBy]: sortOrder },
     });
@@ -71,7 +89,6 @@ const getAllMealsFromDB = async (query: any) => {
 
 const updateMealInDB = async (mealId: string, userId: string, payload: any) => {
     const providerId = await getProviderIdByUserId(userId);
-    
     return await prisma.meal.update({
         where: { id: mealId, providerId }, 
         data: payload,
@@ -80,7 +97,6 @@ const updateMealInDB = async (mealId: string, userId: string, payload: any) => {
 
 const deleteMealFromDB = async (mealId: string, userId: string) => {
     const providerId = await getProviderIdByUserId(userId);
-    
     return await prisma.meal.delete({
         where: { id: mealId, providerId }, 
     });
@@ -90,20 +106,28 @@ const getSingleMealFromDB = async (id: string) => {
   const result = await prisma.meal.findUnique({
     where: { id },
     include: {
-      category: {
-        select: { name: true } 
-      },
+      category: { select: { name: true } },
       provider: {
         select: { 
           restaurantName: true, 
           address: true,
           phone: true 
         } 
+      },
+      
+      reviews: {
+        include: {
+            customer: {
+                select: { name: true, image: true }
+            }
+        },
+        orderBy: { createdAt: 'desc' }
       }
     }
   });
   return result;
 };
+
 export const MealService = {
     createMealIntoDB,
     getAllMealsFromDB,
