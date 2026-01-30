@@ -13,6 +13,6 @@ router.get("/", auth(UserRole.ADMIN,UserRole.PROVIDER), OrderController.getAllOr
 
 router.get("/:id", auth(UserRole.ADMIN, UserRole.PROVIDER, UserRole.CUSTOMER), OrderController.getOrderDetails);
 
-router.patch("/:id/status", auth(UserRole.PROVIDER), OrderController.updateOrderStatus);
+router.patch("/:id", auth(UserRole.PROVIDER), OrderController.updateOrderStatus);
 
 export const OrderRoutes = router;

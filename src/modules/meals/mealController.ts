@@ -43,11 +43,31 @@ const deleteMeal = async (req: Request, res: Response) => {
     }
 };
 
+const getMealDetails = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await MealService.getSingleMealFromDB(id as string);
+
+    if (!result) {
+      return res.status(404).json({ success: false, message: "Meal not found!" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Meal details retrieved successfully",
+      data: result
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
 export const MealController = { 
     createMeal, 
     getAllMeals, 
     updateMeal, 
-    deleteMeal };
+    deleteMeal,
+    getMealDetails 
+};
 
 
     

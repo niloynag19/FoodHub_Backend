@@ -5,6 +5,10 @@ const createOrderIntoDB = async (userId: string, payload: any) => {
 
     if (!items || items.length === 0) throw new Error("Order items cannot be empty");
 
+    if (!deliveryAddress || deliveryAddress.trim() === "") {
+        throw new Error("Delivery address is required to place an order");
+    }
+
     return await prisma.$transaction(async (tx) => {
         let totalAmount = 0;
         const orderItemsData = [];
@@ -88,7 +92,6 @@ const getOrderByIdFromDB = async (orderId: string, userId: string, role: UserRol
 
     if (!order) throw new Error("Order not found");
 
-    // Security Check
     if (role === UserRole.CUSTOMER && order.customerId !== userId) throw new Error("Unauthorized");
     return order;
 };

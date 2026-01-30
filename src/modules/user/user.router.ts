@@ -1,10 +1,18 @@
 import express from "express";
-import { createUser, getAllUsers } from "./user.controller";
+import { UserController } from "./user.controller";
+import auth, { UserRole } from "../../middlewares/auth";
 
 
 const router = express.Router();
 
-router.post("/create", createUser);
-router.get("/", getAllUsers);
+router.post("/register", UserController.registerUser);
 
-export const userRoutes= router;
+router.post("/login", UserController.loginUser);
+
+router.get("/",auth(UserRole.ADMIN),UserController.getAllUsers)
+
+router.get("/me", auth(UserRole.ADMIN, UserRole.CUSTOMER, UserRole.PROVIDER), UserController.getMyProfile);
+
+router.patch("/admin/users/:id", auth(UserRole.ADMIN), UserController.updateUserStatus);
+
+export const UserRoutes = router;

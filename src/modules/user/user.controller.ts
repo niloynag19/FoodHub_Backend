@@ -1,33 +1,82 @@
 import { Request, Response } from "express";
-import { createUserService, getAllUsersService } from "./user.service";
+import { UserService } from "./user.service";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
-
-// Create new user
-export const createUser = async (req: Request, res: Response) => {
+const registerUser = async (req: Request, res: Response) => {
   try {
-    const { name, email, password } = req.body;
+    const { password, ...rest } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const result = await UserService.createUserService({ ...rest, password: hashedPassword });
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
-    const user = await createUserService({ name, email, password });
-
-    res.status(201).json({ user });
+    res.status(201).json({ success: true, message: "User registered!", data: result });
   } catch (err: any) {
-    if (err.code === "P2002") {
-      return res.status(400).json({ message: "Email already exists" });
-    }
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(400).json({ success: false, message: err.message });
   }
 };
 
-// Get all users
-export const getAllUsers = async (req: Request, res: Response) => {
+const loginUser = async (req: Request, res: Response) => {
   try {
-    const users = await getAllUsersService();
-    res.status(200).json({ users });
+    const user = await UserService.loginUserService(req.body);
+    const isMatched = await bcrypt.compare(req.body.password, user.password as string);
+    if (!isMatched) throw new Error("Invalid password!");
+
+    const token = jwt.sign(
+      { id: user.id, role: user.role, email: user.email },
+      process.env.JWT_SECRET || "secret",
+      { expiresIn: "1d" }
+    );
+
+    res.status(200).json({ success: true, token, user });
   } catch (err: any) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(400).json({ success: false, message: err.message });
   }
+};
+
+const getMyProfile = async (req: Request, res: Response) => {
+  try {
+    const userPayload = (req as any).user;
+    const identifier = userPayload.id || userPayload.email;
+
+    const result = await UserService.getMyProfile(identifier);
+
+    if (!result) {
+      return res.status(404).json({ success: false, message: "User not found!" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User profile retrieved successfully",
+      data: result,
+    });
+  } catch (err: any) {
+    res.status(401).json({ success: false, message: "Unauthorized!" });
+  }
+};
+const updateUserStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const result = await UserService.updateUserStatusInDB(id as string, status);
+    res.status(200).json({ success: true, message: "User status updated!", data: result });
+  } catch (err: any) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const result = await UserService.getAllUsersService;
+    res.status(200).json({ success: true, data: result });
+  } catch (err: any) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+export const UserController = {
+  registerUser,
+  loginUser,
+  getMyProfile,
+  getAllUsers,
+  updateUserStatus
+
 };
