@@ -7,6 +7,7 @@ import { CategoryRoutes } from "./modules/category/category.routes";
 import { MealRoutes } from "./modules/meals/mealRoutes";
 import { OrderRoutes } from "./modules/order/orderRoutes";
 import { UserRoutes } from "./modules/user/user.router";
+import { ProviderRoutes } from "./modules/provider/providerRoutes";
 
 
 const app=express();
@@ -16,7 +17,10 @@ app.use(cors({
     credentials:true
 }))
 app.use(express.json());
+
 app.use("/api/users", UserRoutes);
+
+app.use("/api/providers", ProviderRoutes)
 
 app.use("/api/categories", CategoryRoutes);
 
