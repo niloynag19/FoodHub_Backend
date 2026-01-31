@@ -4,7 +4,7 @@ import { prisma } from "../lib/prisma";
 async function seedProvider() {
     try {
         console.log(" Provider Seeding Started...");
-        const providerEmail = "provider1000@gmail.com";
+        const providerEmail = "provider@gmail.com";
         const providerPassword = "provider12345";
 
         await prisma.providerProfile.deleteMany({ where: { user: { email: providerEmail } } });

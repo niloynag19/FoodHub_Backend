@@ -1,21 +1,28 @@
 import { prisma, Prisma, OrderStatus, UserRole } from "../../lib/prisma";
 
 const createOrderIntoDB = async (userId: string, payload: any) => {
-    const { items, deliveryAddress, providerId } = payload;
+    const { items, deliveryAddress } = payload; 
 
     if (!items || items.length === 0) throw new Error("Order items cannot be empty");
-
     if (!deliveryAddress || deliveryAddress.trim() === "") {
-        throw new Error("Delivery address is required to place an order");
+        throw new Error("Delivery address is required");
     }
 
     return await prisma.$transaction(async (tx) => {
         let totalAmount = 0;
         const orderItemsData = [];
+        let finalProviderProfileId = "";
 
         for (const item of items) {
-            const meal = await tx.meal.findUnique({ where: { id: item.mealId } });
+            const meal = await tx.meal.findUnique({ 
+                where: { id: item.mealId } 
+            });
+            
             if (!meal) throw new Error(`Meal not found: ${item.mealId}`);
+
+            if (!finalProviderProfileId) {
+                finalProviderProfileId = meal.providerId; 
+            }
 
             totalAmount += meal.price * item.quantity;
             orderItemsData.push({
@@ -25,13 +32,14 @@ const createOrderIntoDB = async (userId: string, payload: any) => {
             });
         }
 
+        // ফাইনাল চেক: খাবার থেকে পাওয়া providerId আসলেই ProviderProfile টেবিলে আছে কি না
         return await tx.order.create({
             data: {
                 customerId: userId,
-                providerId,
+                providerId: finalProviderProfileId, // এটিই সঠিক Profile ID
                 deliveryAddress,
                 totalAmount,
-                status: OrderStatus.PLACED,
+                status: "PLACED",
                 items: { create: orderItemsData },
             },
             include: { items: true },

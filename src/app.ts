@@ -11,6 +11,7 @@ import { ProviderRoutes } from "./modules/provider/providerRoutes";
 import { ReviewRoutes } from "./modules/review/reviewRoutes";
 import { StatsRoutes } from "./modules/stats/state.routes";
 import { AdminRoutes } from "./modules/admin/adminRoutes";
+import globalErrorHandler from "./middlewares/globalErrorHandler";
  
 
 const app = express();
@@ -39,6 +40,8 @@ app.use("/api/orders", OrderRoutes);
 app.use("/api/reviews", ReviewRoutes); 
 
 app.use("/api/stats", StatsRoutes)
+
+app.use(globalErrorHandler);
 
 // Better Auth Handler
 app.all("/api/auth/*splat", toNodeHandler(auth));

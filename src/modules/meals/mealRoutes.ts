@@ -11,7 +11,7 @@ router.get("/:id", MealController.getMealDetails);
 
 router.post("/add-meal", auth(UserRole.PROVIDER), MealController.createMeal);
 
-router.patch("/:id", auth(UserRole.PROVIDER), MealController.updateMeal);
+router.put("/:id", auth(UserRole.PROVIDER), MealController.updateMeal);
 
 router.delete("/:id", auth(UserRole.PROVIDER), MealController.deleteMeal);
 

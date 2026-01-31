@@ -4,7 +4,7 @@ import { prisma } from "../lib/prisma";
 async function seedAdmin() {
     try {
         console.log("🚀 Seeding Started...");
-        const adminEmail = "admin2@admin.com";
+        const adminEmail = "admin@admin.com";
         const adminPassword = "admin1234";
 
         await prisma.account.deleteMany({ where: { user: { email: adminEmail } } });

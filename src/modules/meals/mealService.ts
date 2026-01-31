@@ -89,10 +89,20 @@ const getAllMealsFromDB = async (query: any) => {
 
 const updateMealInDB = async (mealId: string, userId: string, payload: any) => {
     const providerId = await getProviderIdByUserId(userId);
-    return await prisma.meal.update({
-        where: { id: mealId, providerId }, 
+
+    const result = await prisma.meal.update({
+        where: { 
+            id: mealId, 
+            providerId: providerId 
+        }, 
         data: payload,
     });
+
+    if (!result) {
+        throw new Error("Meal not found or you are not authorized!");
+    }
+
+    return result;
 };
 
 const deleteMealFromDB = async (mealId: string, userId: string) => {

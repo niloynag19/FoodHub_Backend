@@ -23,14 +23,23 @@ const getAllMeals = async (req: Request, res: Response) => {
 
 const updateMeal = async (req: Request, res: Response) => {
     try {
-        const result = await MealService.updateMealInDB(req.params.id as string, (req as any).user.id, req.body);
-        res.status(200).json({ 
-            success: true, 
-            message: "Meal updated successfully", 
-            data: result });
-            
+        const user = req.user as { id: string; role: string };
+        const userId = user.id;
+        const mealId = req.params.id;
+        const payload = req.body;
+
+        const result = await MealService.updateMealInDB(mealId as string, userId, payload);
+
+        res.status(200).json({
+            success: true,
+            message: "Meal updated successfully",
+            data: result
+        });
     } catch (error: any) {
-        res.status(403).json({ success: false, message: "Unauthorized or Meal not found" });
+        res.status(400).json({
+            success: false,
+            message: error.message || "Failed to update meal"
+        });
     }
 };
 
@@ -44,30 +53,29 @@ const deleteMeal = async (req: Request, res: Response) => {
 };
 
 const getMealDetails = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const result = await MealService.getSingleMealFromDB(id as string);
+    try {
+        const { id } = req.params;
+        const result = await MealService.getSingleMealFromDB(id as string);
 
-    if (!result) {
-      return res.status(404).json({ success: false, message: "Meal not found!" });
+        if (!result) {
+            return res.status(404).json({ success: false, message: "Meal not found!" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Meal details retrieved successfully",
+            data: result
+        });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
     }
-
-    res.status(200).json({
-      success: true,
-      message: "Meal details retrieved successfully",
-      data: result
-    });
-  } catch (err: any) {
-    res.status(500).json({ success: false, message: err.message });
-  }
 };
-export const MealController = { 
-    createMeal, 
-    getAllMeals, 
-    updateMeal, 
+export const MealController = {
+    createMeal,
+    getAllMeals,
+    updateMeal,
     deleteMeal,
-    getMealDetails 
+    getMealDetails
 };
 
 
-    
