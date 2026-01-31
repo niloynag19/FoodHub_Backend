@@ -32,11 +32,11 @@ const createOrderIntoDB = async (userId: string, payload: any) => {
             });
         }
 
-        // ফাইনাল চেক: খাবার থেকে পাওয়া providerId আসলেই ProviderProfile টেবিলে আছে কি না
+        
         return await tx.order.create({
             data: {
                 customerId: userId,
-                providerId: finalProviderProfileId, // এটিই সঠিক Profile ID
+                providerId: finalProviderProfileId,
                 deliveryAddress,
                 totalAmount,
                 status: "PLACED",
