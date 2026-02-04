@@ -4,11 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npx tsx watch src/server.ts",
-    "admin": "npx tsx watch src/scripts/Admin.ts",
-    "provider": "npx tsx watch src/scripts/provider.ts"
-  },
+  "test": "echo \"Error: no test specified\" && exit 1",
+  "dev": "npx tsx watch src/server.ts",
+  "seed:admin": "npx tsx src/scripts/Admin.ts",
+  "seed:provider": "npx tsx src/scripts/Provider.ts",
+  "build": "prisma generate && tsup src/server.ts --format esm --platform node --target node20 --outDir api --external pg-native --clean",
+  "postinstall": "prisma generate"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -22,6 +24,7 @@
     "@types/nodemailer": "^7.0.9",
     "@types/pg": "^8.16.0",
     "prisma": "^7.3.0",
+    "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },

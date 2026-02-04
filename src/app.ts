@@ -12,6 +12,7 @@ import { ReviewRoutes } from "./modules/review/reviewRoutes";
 import { StatsRoutes } from "./modules/stats/state.routes";
 import { AdminRoutes } from "./modules/admin/adminRoutes";
 import globalErrorHandler from "./middlewares/globalErrorHandler";
+import { CartRoutes } from "./modules/cart/cartRoutes";
  
 
 const app = express();
@@ -25,6 +26,8 @@ app.use(express.json());
 
 // --- Routes Registration ---
 
+app.all("/api/auth/*splat", toNodeHandler(auth));
+
 app.use("/api/users", UserRoutes);
 
 app.use("/api/providers", ProviderRoutes);
@@ -37,6 +40,8 @@ app.use("/api/meals", MealRoutes);
 
 app.use("/api/orders", OrderRoutes);
 
+app.use("/api/cart", CartRoutes);
+
 app.use("/api/reviews", ReviewRoutes); 
 
 app.use("/api/stats", StatsRoutes)
@@ -44,7 +49,7 @@ app.use("/api/stats", StatsRoutes)
 app.use(globalErrorHandler);
 
 // Better Auth Handler
-app.all("/api/auth/*splat", toNodeHandler(auth));
+
 
 app.get("/", (req, res) => {
     res.send("Food Delivery API is running...")
