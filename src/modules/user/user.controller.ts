@@ -66,7 +66,7 @@ const updateUserStatus = async (req: Request, res: Response) => {
 
 const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const result = await UserService.getAllUsersService;
+    const result = await UserService.getAllUsersService();
     res.status(200).json({ success: true, data: result });
   } catch (err: any) {
     res.status(400).json({ success: false, message: err.message });
