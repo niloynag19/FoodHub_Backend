@@ -17,9 +17,24 @@ const transporter = nodemailer.createTransport({
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
-        provider: "postgresql", 
+        provider: "postgresql",
     }),
-    
+
+    databaseHooks: {
+        user: {
+            create: {
+                before: async (user) => {
+                    return {
+                        data: {
+                            ...user,
+                            emailVerified: true,
+                        },
+                    };
+                },
+            },
+        },
+    },
+
     trustedOrigins: [process.env.APP_URL!],
     user: {
         additionalFields: {
@@ -45,8 +60,8 @@ export const auth = betterAuth({
         requireEmailVerification: false,
     },
     emailVerification: {
-        sendOnSignUp:true,
-        autoSignInAfterVerification:true,
+        sendOnSignUp: false,
+        autoSignInAfterVerification: true,
         sendVerificationEmail: async ({ user, url, token }, request) => {
             try {
                 const verificationUrl = `${process.env.APP_URL}/verify-email?token=${token}`;
@@ -90,11 +105,11 @@ export const auth = betterAuth({
         },
     },
     socialProviders: {
-        google: { 
-            prompt:"select_account consent",
-            accessType:"offline",
-            clientId: process.env.GOOGLE_CLIENT_ID as string, 
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
-        }, 
+        google: {
+            prompt: "select_account consent",
+            accessType: "offline",
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+        },
     },
 });

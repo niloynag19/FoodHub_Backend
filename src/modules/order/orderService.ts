@@ -8,6 +8,17 @@ const createOrderIntoDB = async (userId: string, payload: any) => {
         throw new Error("Delivery address is required");
     }
 
+    // --- এই অংশটুকু যোগ করুন ---
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { status: true }
+    });
+
+    if (user?.status === "SUSPENDED") {
+        throw new Error("Your account is suspended! You cannot place any new orders.");
+    }
+    // -----------------------
+
     return await prisma.$transaction(async (tx) => {
         let totalAmount = 0;
         const orderItemsData = [];
@@ -32,7 +43,6 @@ const createOrderIntoDB = async (userId: string, payload: any) => {
             });
         }
 
-        
         return await tx.order.create({
             data: {
                 customerId: userId,
