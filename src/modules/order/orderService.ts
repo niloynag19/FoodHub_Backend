@@ -57,6 +57,52 @@ const createOrderIntoDB = async (userId: string, payload: any) => {
     });
 };
 
+// const getAllOrdersFromDB = async (query: any, role: UserRole, userId: string) => {
+//     const { status, searchTerm, page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = query;
+
+//     const skip = (Number(page) - 1) * Number(limit);
+//     const take = Number(limit);
+
+//     const whereConditions: Prisma.OrderWhereInput = {};
+
+//     if (role === UserRole.PROVIDER) {
+//         const providerProfile = await prisma.providerProfile.findUnique({ where: { userId } });
+//         if (!providerProfile) throw new Error("Provider profile not found");
+//         whereConditions.providerId = providerProfile.id;
+//     } else if (role === UserRole.CUSTOMER) {
+//         whereConditions.customerId = userId;
+//     }
+
+//     if (status) whereConditions.status = status as OrderStatus;
+
+//     if (searchTerm) {
+//         whereConditions.OR = [
+//             { deliveryAddress: { contains: searchTerm, mode: "insensitive" } },
+//             { id: { contains: searchTerm, mode: "insensitive" } },
+//         ];
+//     }
+
+//     const orders = await prisma.order.findMany({
+//         where: whereConditions,
+//         skip,
+//         take,
+//         orderBy: { [sortBy]: sortOrder } as Prisma.OrderOrderByWithRelationInput,
+//         include: {
+//             customer: { select: { name: true, email: true, phone: true } },
+//             provider: { select: { restaurantName: true, phone: true } },
+//             items: { include: { meal: true } },
+//         },
+//     });
+
+//     const total = await prisma.order.count({ where: whereConditions });
+
+//     return {
+//         meta: { page: Number(page), limit: take, total, totalPage: Math.ceil(total / take) },
+//         data: orders,
+//     };
+// };
+
+
 const getAllOrdersFromDB = async (query: any, role: UserRole, userId: string) => {
     const { status, searchTerm, page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = query;
 
@@ -65,13 +111,16 @@ const getAllOrdersFromDB = async (query: any, role: UserRole, userId: string) =>
 
     const whereConditions: Prisma.OrderWhereInput = {};
 
+    // --- এই অংশটুকু আপডেট করা হয়েছে ---
     if (role === UserRole.PROVIDER) {
-        const providerProfile = await prisma.providerProfile.findUnique({ where: { userId } });
-        if (!providerProfile) throw new Error("Provider profile not found");
-        whereConditions.providerId = providerProfile.id;
+        // প্রোফাইল আলাদাভাবে না খুঁজে সরাসরি অর্ডারের ভেতরের রিলেশন ব্যবহার করুন
+        whereConditions.provider = {
+            userId: userId // সরাসরি ইউজারের আইডি দিয়ে অর্ডার খুঁজুন
+        };
     } else if (role === UserRole.CUSTOMER) {
         whereConditions.customerId = userId;
     }
+    // --------------------------------
 
     if (status) whereConditions.status = status as OrderStatus;
 
@@ -101,7 +150,6 @@ const getAllOrdersFromDB = async (query: any, role: UserRole, userId: string) =>
         data: orders,
     };
 };
-
 const getOrderByIdFromDB = async (orderId: string, userId: string, role: UserRole) => {
     const order = await prisma.order.findUnique({
         where: { id: orderId },

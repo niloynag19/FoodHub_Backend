@@ -7,7 +7,7 @@ const createUserService = async (payload: any) => {
     data: {
       name,
       email,
-      password, 
+      password,
       role: (role as UserRole) || "CUSTOMER",
       phone: phone || null,
     },
@@ -24,27 +24,39 @@ const loginUserService = async (payload: any) => {
   return user;
 };
 
-const getAllUsersService = async () => {
-  return await prisma.user.findMany({
-    select: { id: true, name: true, email: true, role: true, status: true, createdAt: true }
+const getAllUsersFromDB = async () => {
+  const result = await prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      image: true,
+      createdAt: true,
+    },
+    orderBy: {
+      createdAt: "desc", 
+    },
   });
+  return result;
 };
 
 const getMyProfile = async (identifier: string) => {
   return await prisma.user.findFirst({
     where: {
       OR: [
-        { id: identifier },    
+        { id: identifier },
         { email: identifier }
       ]
     },
-    select: { 
-      id: true, 
-      name: true, 
-      email: true, 
-      role: true, 
-      status: true, 
-      phone: true 
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      phone: true
     }
   });
 };
@@ -59,7 +71,7 @@ const updateUserStatusInDB = async (id: string, status: UserStatus) => {
 export const UserService = {
   createUserService,
   loginUserService,
-  getAllUsersService,
   getMyProfile,
-  updateUserStatusInDB
+  updateUserStatusInDB,
+  getAllUsersFromDB
 };

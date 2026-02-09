@@ -3,13 +3,16 @@ import { AdminService } from "./adminService";
 
 
 const getAllUsers = async (req: Request, res: Response) => {
-  const role = req.query.role as string;
-  const result = await AdminService.getAllUsersFromDB(role);
-  res.status(200).json({
-    success: true,
-    message: "Users fetched successfully",
-    data: result
-  });
+  try {
+    const result = await AdminService.getAllUsersFromDB();
+    res.status(200).json({
+      success: true,
+      message: "Users fetched successfully",
+      data: result
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 };
 
 const getStats = async (req: Request, res: Response) => {

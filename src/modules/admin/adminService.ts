@@ -1,16 +1,17 @@
 import { prisma } from "../../lib/prisma";
 
-const getAllUsersFromDB = async (role?: string) => {
+const getAllUsersFromDB = async () => {
   return await prisma.user.findMany({
-    where: role ? { role: role as any } : {},
     select: {
       id: true,
       name: true,
       email: true,
       role: true,
+      status: true,
+      image: true,
       createdAt: true,
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' } // Shob somoy latest user agey thakbe
   });
 };
 

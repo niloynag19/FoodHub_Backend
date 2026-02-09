@@ -19,6 +19,26 @@ export const auth = betterAuth({
     database: prismaAdapter(prisma, {
         provider: "postgresql",
     }),
+    session: {
+        cookieCache: {
+            enabled: true,
+            maxAge: 5 * 60, // 5 minutes
+        },
+    },
+    advanced: {
+        cookiePrefix: "better-auth",
+        useSecureCookies: true, // Must be true for SameSite: None
+        crossSiteCookies: {
+            enabled: true, // Enable this
+            allowedOrigins: [process.env.APP_URL!], // Your frontend URL
+        },
+        // Add this to ensure the browser accepts the cookie from a different domain
+        cookieAttributes: {
+            sameSite: "none",
+            secure: true,
+        },
+        disableCSRFCheck: true,
+    },
 
     databaseHooks: {
         user: {

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { UserService } from "./user.service";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -64,12 +64,13 @@ const updateUserStatus = async (req: Request, res: Response) => {
   }
 };
 
-const getAllUsers = async (req: Request, res: Response) => {
+const getAllUsers = async (req: Request, res: Response,next:NextFunction) => {
   try {
-    const result = await UserService.getAllUsersService();
+    const result = await UserService.getAllUsersFromDB();
+    console.log(result);
     res.status(200).json({ success: true, data: result });
   } catch (err: any) {
-    res.status(400).json({ success: false, message: err.message });
+    next(err);
   }
 };
 export const UserController = {

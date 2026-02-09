@@ -9,7 +9,7 @@ router.post("/register", UserController.registerUser);
 
 router.post("/login", UserController.loginUser);
 
-router.get("/",auth(UserRole.ADMIN),UserController.getAllUsers)
+router.get("/",auth(UserRole.ADMIN),UserController.getAllUsers);
 
 router.get("/me", auth(UserRole.ADMIN, UserRole.CUSTOMER, UserRole.PROVIDER), UserController.getMyProfile);
 
