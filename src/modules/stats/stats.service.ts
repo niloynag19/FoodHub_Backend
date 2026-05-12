@@ -37,6 +37,8 @@ const getAdminStatsFromDB = async () => {
     })
   ]);
 
+  console.log("Admin Stats Counts:", { totalUsers, totalProviders, totalMeals, totalOrders });
+
   return {
     summary: {
       totalUsers,
@@ -45,6 +47,7 @@ const getAdminStatsFromDB = async () => {
       totalOrders,
       totalRevenue: revenueData._sum.totalAmount || 0
     },
+
     ordersByStatus: ordersByStatus.map(item => ({
       status: item.status,
       count: item._count.id
