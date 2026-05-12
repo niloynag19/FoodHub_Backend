@@ -1,11 +1,34 @@
-import { prisma } from "./src/lib/prisma";
+import "dotenv/config";
+import pg from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from './generated/prisma/client'; 
 
-async function check() {
-  const count = await prisma.meal.count();
-  console.log(`Meal count: ${count}`);
-  const meals = await prisma.meal.findMany({ take: 5 });
-  console.log("Sample meals:", JSON.stringify(meals, null, 2));
-  process.exit(0);
+const connectionString = `${process.env.DATABASE_URL}`;
+const pool = new pg.Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+
+const prisma = new PrismaClient({ adapter });
+
+async function main() {
+  const userCount = await prisma.user.count();
+  const mealCount = await prisma.meal.count();
+  const orderCount = await prisma.order.count();
+  const categoryCount = await prisma.category.count();
+
+  console.log({
+    userCount,
+    mealCount,
+    orderCount,
+    categoryCount,
+  });
 }
 
-check();
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+    await pool.end();
+  });
