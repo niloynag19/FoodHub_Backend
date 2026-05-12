@@ -63,27 +63,32 @@ const getAdminStatsFromDB = async () => {
       }
       return acc;
     }, []),
-    weeklyOrders: await prisma.order.findMany({
+    recentOrderVolume: await prisma.order.findMany({
       where: {
         createdAt: {
-          gte: new Date(new Date().setDate(new Date().getDate() - 7))
+          gte: new Date(new Date().setDate(new Date().getDate() - 30))
         }
       },
       select: { createdAt: true }
     }).then(orders => {
-      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      const counts: Record<string, number> = {};
-      days.forEach(day => counts[day] = 0);
+      const result: Record<string, number> = {};
+      // Initialize last 7 days to ensure at least some labels
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        result[d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })] = 0;
+      }
       
       orders.forEach(order => {
-        const day = days[order.createdAt.getDay()];
-        counts[day]++;
+        const date = order.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        result[date] = (result[date] || 0) + 1;
       });
       
-      return days.map(day => ({ day, orders: counts[day] }));
+      return Object.entries(result).map(([date, count]) => ({ date, orders: count }));
     })
   };
 };
+
 
 
 const getProviderStatsFromDB = async (userId: string) => {
@@ -127,9 +132,27 @@ const getProviderStatsFromDB = async (userId: string) => {
     ordersByStatus: myOrdersByStatus.map(item => ({
       status: item.status,
       count: item._count.id
-    }))
+    })),
+    monthlyRevenue: await prisma.order.findMany({
+      where: { providerId: provider.id, status: "DELIVERED" },
+      select: { totalAmount: true, createdAt: true },
+      orderBy: { createdAt: 'asc' }
+    }).then(orders => {
+      const acc: any[] = [];
+      orders.forEach(order => {
+        const month = order.createdAt.toLocaleString('default', { month: 'short' });
+        const existing = acc.find(item => item.month === month);
+        if (existing) {
+          existing.revenue += order.totalAmount;
+        } else {
+          acc.push({ month, revenue: order.totalAmount });
+        }
+      });
+      return acc;
+    })
   };
 };
+
 
 
 export const StatsService = {
