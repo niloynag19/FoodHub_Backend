@@ -49,8 +49,13 @@ const allowedOrigins = [
 // );
 app.use(
     cors({
-        origin: process.env.APP_URL, // Use your actual frontend URL
+        origin: [
+            "http://localhost:3000",
+            "https://foodhub-frontend-zeta.vercel.app"
+        ],
         credentials: true,
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
     }),
 );
 app.use(express.json());
