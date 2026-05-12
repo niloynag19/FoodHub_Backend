@@ -1,59 +1,116 @@
 import { prisma } from "../../lib/prisma";
 
 const getAdminStatsFromDB = async () => {
-  const totalUsers = await prisma.user.count();
-  const totalProviders = await prisma.providerProfile.count();
-  const totalMeals = await prisma.meal.count();
-  const totalOrders = await prisma.order.count();
-  
-
-  const totalRevenue = await prisma.order.aggregate({
-    where: { status: "DELIVERED" },
-    _sum: { totalAmount: true }
-  });
-
-  return {
+  const [
     totalUsers,
     totalProviders,
     totalMeals,
     totalOrders,
-    totalRevenue: totalRevenue._sum.totalAmount || 0
+    revenueData,
+    ordersByStatus,
+    categoryStats,
+    monthlyRevenue
+  ] = await Promise.all([
+    prisma.user.count(),
+    prisma.providerProfile.count(),
+    prisma.meal.count(),
+    prisma.order.count(),
+    prisma.order.aggregate({
+      where: { status: "DELIVERED" },
+      _sum: { totalAmount: true }
+    }),
+    prisma.order.groupBy({
+      by: ['status'],
+      _count: { id: true }
+    }),
+    prisma.category.findMany({
+      select: {
+        name: true,
+        _count: { select: { meals: true } }
+      }
+    }),
+    prisma.order.findMany({
+      where: { status: "DELIVERED" },
+      select: { totalAmount: true, createdAt: true },
+      take: 100,
+      orderBy: { createdAt: 'asc' }
+    })
+  ]);
+
+  return {
+    summary: {
+      totalUsers,
+      totalProviders,
+      totalMeals,
+      totalOrders,
+      totalRevenue: revenueData._sum.totalAmount || 0
+    },
+    ordersByStatus: ordersByStatus.map(item => ({
+      status: item.status,
+      count: item._count.id
+    })),
+    categoryStats: categoryStats.map(item => ({
+      name: item.name,
+      meals: item._count.meals
+    })),
+    monthlyRevenue: monthlyRevenue.reduce((acc: any[], order) => {
+      const month = order.createdAt.toLocaleString('default', { month: 'short' });
+      const existing = acc.find(item => item.month === month);
+      if (existing) {
+        existing.revenue += order.totalAmount;
+      } else {
+        acc.push({ month, revenue: order.totalAmount });
+      }
+      return acc;
+    }, [])
   };
 };
 
 const getProviderStatsFromDB = async (userId: string) => {
-
   const provider = await prisma.providerProfile.findUnique({
     where: { userId }
   });
 
   if (!provider) throw new Error("Provider not found!");
 
-  const myTotalMeals = await prisma.meal.count({
-    where: { providerId: provider.id }
-  });
-
-  const myOrders = await prisma.order.findMany({
-    where: {
-      items: {
-        some: {
-          meal: { providerId: provider.id }
-        }
-      }
-    }
-  });
-
-  const myRevenue = myOrders
-    .filter(order => order.status === "DELIVERED")
-    .reduce((sum, order) => sum + order.totalAmount, 0);
+  const [
+    myTotalMeals,
+    myOrders,
+    revenueData,
+    myOrdersByStatus
+  ] = await Promise.all([
+    prisma.meal.count({ where: { providerId: provider.id } }),
+    prisma.order.findMany({
+      where: { providerId: provider.id },
+      include: { items: { include: { meal: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 10
+    }),
+    prisma.order.aggregate({
+      where: { providerId: provider.id, status: "DELIVERED" },
+      _sum: { totalAmount: true }
+    }),
+    prisma.order.groupBy({
+      where: { providerId: provider.id },
+      by: ['status'],
+      _count: { id: true }
+    })
+  ]);
 
   return {
-    myTotalMeals,
-    totalOrders: myOrders.length,
-    totalRevenue: myRevenue,
-    recentOrders: myOrders.slice(0, 5) 
+    summary: {
+      totalMeals: myTotalMeals,
+      totalOrders: myOrders.length,
+      totalRevenue: revenueData._sum.totalAmount || 0
+    },
+    recentOrders: myOrders,
+    ordersByStatus: myOrdersByStatus.map(item => ({
+      status: item.status,
+      count: item._count.id
+    }))
   };
 };
+
 
 export const StatsService = {
   getAdminStatsFromDB,
