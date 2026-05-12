@@ -62,9 +62,29 @@ const getAdminStatsFromDB = async () => {
         acc.push({ month, revenue: order.totalAmount });
       }
       return acc;
-    }, [])
+    }, []),
+    weeklyOrders: await prisma.order.findMany({
+      where: {
+        createdAt: {
+          gte: new Date(new Date().setDate(new Date().getDate() - 7))
+        }
+      },
+      select: { createdAt: true }
+    }).then(orders => {
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const counts: Record<string, number> = {};
+      days.forEach(day => counts[day] = 0);
+      
+      orders.forEach(order => {
+        const day = days[order.createdAt.getDay()];
+        counts[day]++;
+      });
+      
+      return days.map(day => ({ day, orders: counts[day] }));
+    })
   };
 };
+
 
 const getProviderStatsFromDB = async (userId: string) => {
   const provider = await prisma.providerProfile.findUnique({
