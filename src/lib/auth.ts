@@ -29,17 +29,22 @@ export const auth = betterAuth({
         cookiePrefix: "better-auth",
         useSecureCookies: true, // Must be true for SameSite: None
         crossSiteCookies: {
-            enabled: true, // Enable this
-            allowedOrigins: [process.env.APP_URL!], // Your frontend URL
+            enabled: true,
+            allowedOrigins: [
+                "http://localhost:3000",
+                "https://foodhub-frontend-zeta.vercel.app"
+            ],
         },
-        // Add this to ensure the browser accepts the cookie from a different domain
         cookieAttributes: {
             sameSite: "none",
             secure: true,
         },
         disableCSRFCheck: true,
     },
-
+    trustedOrigins: [
+        "http://localhost:3000",
+        "https://foodhub-frontend-zeta.vercel.app"
+    ],
     databaseHooks: {
         user: {
             create: {
@@ -54,8 +59,6 @@ export const auth = betterAuth({
             },
         },
     },
-
-    trustedOrigins: [process.env.APP_URL!],
     user: {
         additionalFields: {
             role: {
