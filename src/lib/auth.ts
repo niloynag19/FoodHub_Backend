@@ -36,7 +36,8 @@ export const auth = betterAuth({
     },
     trustedOrigins: [
         "http://localhost:3000",
-        "https://foodhub-frontend-zeta.vercel.app"
+        "https://foodhub-frontend-zeta.vercel.app",
+        "https://foodhub-server-chi.vercel.app"
     ],
     databaseHooks: {
         user: {
