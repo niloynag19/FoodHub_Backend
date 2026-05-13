@@ -152,6 +152,37 @@ const getProviderStatsFromDB = async (userId: string) => {
         }
       });
       return acc;
+    }),
+    recentOrderVolume: await prisma.order.findMany({
+      where: {
+        providerId: provider.id,
+        createdAt: {
+          gte: new Date(new Date().setDate(new Date().getDate() - 30))
+        }
+      },
+      select: { createdAt: true, totalAmount: true }
+    }).then(orders => {
+      const result: Record<string, { orders: number, revenue: number }> = {};
+      // Initialize last 7 days to ensure at least some labels
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        result[d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })] = { orders: 0, revenue: 0 };
+      }
+      
+      orders.forEach(order => {
+        const date = order.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        if (result[date]) {
+          result[date].orders += 1;
+          result[date].revenue += Number(order.totalAmount) || 0;
+        }
+      });
+      
+      return Object.entries(result).map(([date, data]) => ({ 
+        date, 
+        orders: data.orders, 
+        revenue: data.revenue 
+      }));
     })
   };
 };
