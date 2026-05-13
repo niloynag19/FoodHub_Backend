@@ -28,6 +28,7 @@ export const auth = betterAuth({
     advanced: {
         cookiePrefix: "better-auth",
         useSecureCookies: true,
+        crossOrigin: true,
         cookieAttributes: {
             sameSite: "none",
             secure: true,
