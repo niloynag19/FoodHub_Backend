@@ -17,6 +17,8 @@ import { CartRoutes } from "./modules/cart/cartRoutes";
 
 const app = express();
 
+app.set('trust proxy', true);
+
 const allowedOrigins = [
     process.env.APP_URL || "http://localhost:3000",
     process.env.PROD_FRONTEND_URL,
